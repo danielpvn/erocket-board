@@ -21,10 +21,15 @@ export const LoginScreen: React.FC<LoginScreenProps> = ({ onLoginSuccess }) => {
     setIsLoading(true);
 
     setTimeout(() => {
-      const validUser = 'eroketadmin';
-      const validPass = 'erocketeros';
+      const configuredUser = (process.env.NEXT_PUBLIC_ADMIN_USER || 'erocketadmin').toLowerCase();
+      const configuredPass = process.env.NEXT_PUBLIC_ADMIN_PASSWORD || 'erocketeros';
+      const inputUser = username.trim().toLowerCase();
 
-      if (username.trim() === validUser && password === validPass) {
+      // Aceita erocketadmin (ou o configurado por variável de ambiente)
+      const isUserValid = inputUser === configuredUser || inputUser === 'erocketadmin' || inputUser === 'eroketadmin';
+      const isPassValid = password === configuredPass;
+
+      if (isUserValid && isPassValid) {
         localStorage.setItem('erocket_auth_session', 'true');
         onLoginSuccess();
       } else {
