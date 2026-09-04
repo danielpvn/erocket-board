@@ -16,6 +16,7 @@ import {
   Cloud,
   HardDrive,
   RefreshCw,
+  LogOut,
 } from 'lucide-react';
 
 interface BoardStatsHeaderProps {
@@ -23,6 +24,7 @@ interface BoardStatsHeaderProps {
   isDarkMode: boolean;
   syncStatus?: 'synced' | 'syncing' | 'offline' | 'local_only';
   onToggleDarkMode: () => void;
+  onLogout?: () => void;
   onExport: () => void;
   onOpenImport: () => void;
   onOpenDateSettings: () => void;
@@ -35,6 +37,7 @@ export const BoardStatsHeader: React.FC<BoardStatsHeaderProps> = ({
   isDarkMode,
   syncStatus = 'local_only',
   onToggleDarkMode,
+  onLogout,
   onExport,
   onOpenImport,
   onOpenDateSettings,
@@ -161,6 +164,18 @@ export const BoardStatsHeader: React.FC<BoardStatsHeaderProps> = ({
               <Plus className="w-4 h-4" />
               <span>Nova Sprint</span>
             </button>
+
+            {onLogout && (
+              <button
+                type="button"
+                onClick={onLogout}
+                className="inline-flex items-center gap-1.5 px-2.5 py-1.5 text-xs font-medium rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-500 hover:text-rose-600 dark:hover:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/30 hover:border-rose-200 dark:hover:border-rose-900 transition-all cursor-pointer"
+                title="Sair do Board"
+              >
+                <LogOut className="w-3.5 h-3.5" />
+                <span>Sair</span>
+              </button>
+            )}
           </div>
         </div>
 

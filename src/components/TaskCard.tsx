@@ -72,7 +72,7 @@ export const TaskCard: React.FC<TaskCardProps> = ({
         <div className="flex items-start justify-between gap-2">
           <p
             onClick={cycleStatus}
-            className={`text-sm font-medium leading-snug cursor-pointer transition-colors select-none ${
+            className={`text-sm font-medium leading-snug cursor-pointer transition-colors select-none break-words [overflow-wrap:anywhere] ${
               isDone
                 ? 'line-through text-slate-400 dark:text-slate-500'
                 : isInProgress
@@ -152,9 +152,9 @@ export const TaskCard: React.FC<TaskCardProps> = ({
 
         {/* Notes */}
         {task.notes && (
-          <div className="mt-1.5 text-xs text-amber-800/90 dark:text-amber-300/90 bg-amber-500/10 px-2 py-1 rounded-md flex items-center gap-1.5">
+          <div className="mt-1.5 text-xs text-amber-800/90 dark:text-amber-300/90 bg-amber-500/10 px-2 py-1 rounded-md flex items-center gap-1.5 break-words [overflow-wrap:anywhere]">
             <MessageSquareText className="w-3 h-3 shrink-0" />
-            <span className="italic">{task.notes}</span>
+            <span className="italic break-words [overflow-wrap:anywhere]">{task.notes}</span>
           </div>
         )}
 

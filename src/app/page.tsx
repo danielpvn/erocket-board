@@ -15,11 +15,13 @@ import { TaskModal } from '@/components/TaskModal';
 import { SprintModal } from '@/components/SprintModal';
 import { DateSettingsModal } from '@/components/DateSettingsModal';
 import { ImportJsonModal } from '@/components/ImportJsonModal';
+import { LoginScreen } from '@/components/LoginScreen';
 import { Sparkles, Flag } from 'lucide-react';
 
 export default function BoardHomePage() {
   const [boardState, setBoardState] = useState<BoardState>(INITIAL_BOARD_DATA);
   const [isLoaded, setIsLoaded] = useState(false);
+  const [isAuthenticated, setIsAuthenticated] = useState<boolean | null>(null);
   const [syncStatus, setSyncStatus] = useState<'synced' | 'syncing' | 'offline' | 'local_only'>('local_only');
 
   // Filters & UI State
@@ -46,6 +48,17 @@ export default function BoardHomePage() {
 
   // Dark Mode state & persistence
   const [isDarkMode, setIsDarkMode] = useState(false);
+
+  // Authentication check
+  useEffect(() => {
+    const auth = localStorage.getItem('erocket_auth_session') === 'true';
+    setIsAuthenticated(auth);
+  }, []);
+
+  const handleLogout = () => {
+    localStorage.removeItem('erocket_auth_session');
+    setIsAuthenticated(false);
+  };
 
   useEffect(() => {
     const savedTheme = localStorage.getItem('erocket_theme');
@@ -461,6 +474,18 @@ export default function BoardHomePage() {
 
   const activeSprintForTaskTitle = boardState.sprints.find((s) => s.id === selectedSprintIdForTask)?.title;
 
+  if (isAuthenticated === null) {
+    return (
+      <div className="min-h-screen bg-slate-950 flex items-center justify-center">
+        <div className="w-8 h-8 border-3 border-primary border-t-transparent rounded-full animate-spin" />
+      </div>
+    );
+  }
+
+  if (!isAuthenticated) {
+    return <LoginScreen onLoginSuccess={() => setIsAuthenticated(true)} isDarkMode={isDarkMode} />;
+  }
+
   return (
     <div className="min-h-screen bg-slate-100/70 dark:bg-slate-950 flex flex-col font-sans text-slate-900 dark:text-slate-100">
       <BoardStatsHeader
@@ -468,6 +493,7 @@ export default function BoardHomePage() {
         isDarkMode={isDarkMode}
         syncStatus={syncStatus}
         onToggleDarkMode={handleToggleDarkMode}
+        onLogout={handleLogout}
         onExport={() => exportBoardToJson(boardState)}
         onOpenImport={() => setIsImportModalOpen(true)}
         onOpenDateSettings={() => setIsDateModalOpen(true)}
@@ -573,7 +599,7 @@ export default function BoardHomePage() {
           </div>
 
           {isDrawerOpen && (
-            <div className="lg:col-span-4 xl:col-span-3 sticky top-6">
+            <div className="lg:col-span-4 xl:col-span-3 sticky top-6 h-[calc(100vh-6.5rem)]">
               <QuickBacklogDrawer
                 notes={boardState.quickNotes}
                 sprints={boardState.sprints}

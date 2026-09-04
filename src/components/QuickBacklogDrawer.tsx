@@ -89,7 +89,7 @@ export const QuickBacklogDrawer: React.FC<QuickBacklogDrawerProps> = ({
   const bugsCount = notes.filter((n) => n.type === 'bug' && n.status === 'open').length;
 
   return (
-    <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm flex flex-col h-full overflow-hidden">
+    <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm flex flex-col h-[calc(100vh-6.5rem)] max-h-[calc(100vh-6.5rem)] overflow-hidden">
       {/* Header */}
       <div className="p-4 border-b border-slate-100 dark:border-slate-800">
         <div className="flex items-center justify-between">
@@ -257,7 +257,7 @@ export const QuickBacklogDrawer: React.FC<QuickBacklogDrawerProps> = ({
       )}
 
       {/* Notes List */}
-      <div className="flex-1 overflow-y-auto p-3 space-y-2.5">
+      <div className="flex-1 overflow-y-auto min-h-0 p-3 space-y-2.5">
         {filteredNotes.length === 0 ? (
           <div className="py-8 text-center text-xs text-slate-400 dark:text-slate-500">
             Nenhuma anotação nesta categoria.
@@ -302,7 +302,7 @@ export const QuickBacklogDrawer: React.FC<QuickBacklogDrawerProps> = ({
 
                   <div className="flex-1 min-w-0">
                     <p
-                      className={`text-xs font-semibold leading-snug ${
+                      className={`text-xs font-semibold leading-snug break-words [overflow-wrap:anywhere] ${
                         isResolved
                           ? 'line-through text-slate-400 dark:text-slate-500'
                           : 'text-slate-800 dark:text-slate-200'
@@ -312,9 +312,9 @@ export const QuickBacklogDrawer: React.FC<QuickBacklogDrawerProps> = ({
                     </p>
 
                     {note.description && (
-                      <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-1 leading-relaxed">
+                      <div className="text-[11px] text-slate-500 dark:text-slate-400 mt-1.5 leading-relaxed break-words [overflow-wrap:anywhere] bg-slate-50 dark:bg-slate-950/60 p-2 rounded-lg border border-slate-100 dark:border-slate-800">
                         {note.description}
-                      </p>
+                      </div>
                     )}
 
                     <div className="mt-2.5 flex flex-wrap items-center justify-between gap-1.5">
