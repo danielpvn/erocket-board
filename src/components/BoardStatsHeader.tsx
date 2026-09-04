@@ -17,6 +17,8 @@ import {
   HardDrive,
   RefreshCw,
   LogOut,
+  AlertTriangle,
+  Clock,
 } from 'lucide-react';
 
 interface BoardStatsHeaderProps {
@@ -52,8 +54,8 @@ export const BoardStatsHeader: React.FC<BoardStatsHeaderProps> = ({
         <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
           <div>
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-xl bg-primary flex items-center justify-center text-white font-bold shadow-md shadow-primary/20">
-                <Rocket className="w-5 h-5" />
+              <div className="w-10 h-10 rounded-xl bg-white p-1 flex items-center justify-center shadow-md shadow-emerald-500/10 border border-slate-200 dark:border-slate-800 shrink-0">
+                <img src="/logo.png" alt="eRocket Logo" className="w-full h-full object-contain" />
               </div>
               <div>
                 <div className="flex flex-wrap items-center gap-2">
@@ -239,25 +241,38 @@ export const BoardStatsHeader: React.FC<BoardStatsHeaderProps> = ({
             </div>
           </div>
 
-          {/* Estimates */}
+          {/* Estimates & Schedule Health */}
           <div className="p-3.5 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-800/30 flex flex-col justify-between">
             <div className="flex items-center justify-between">
               <span className="text-xs font-bold text-slate-700 dark:text-slate-300">
-                Estimativas Comerciais
+                Saúde do Cronograma
               </span>
-              <span className="text-[11px] px-2 py-0.5 rounded-md bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 font-medium">
-                2 semanas / sprint
-              </span>
+              {stats.delayedSprintsCount > 0 ? (
+                <span className="text-[11px] px-2 py-0.5 rounded-md bg-rose-500/15 text-rose-700 dark:text-rose-300 font-bold border border-rose-500/30 flex items-center gap-1">
+                  <AlertTriangle className="w-3 h-3 text-rose-600" />
+                  <span>{stats.delayedSprintsCount} Atrasada{stats.delayedSprintsCount > 1 ? 's' : ''}</span>
+                </span>
+              ) : stats.warningSprintsCount > 0 ? (
+                <span className="text-[11px] px-2 py-0.5 rounded-md bg-amber-500/15 text-amber-800 dark:text-amber-300 font-bold border border-amber-500/30 flex items-center gap-1">
+                  <Clock className="w-3 h-3 text-amber-600" />
+                  <span>Reta Final</span>
+                </span>
+              ) : (
+                <span className="text-[11px] px-2 py-0.5 rounded-md bg-emerald-500/15 text-emerald-700 dark:text-emerald-300 font-semibold border border-emerald-500/30 flex items-center gap-1">
+                  <CheckCircle2 className="w-3 h-3 text-emerald-600" />
+                  <span>Cronograma em Dia</span>
+                </span>
+              )}
             </div>
 
             <div className="grid grid-cols-2 gap-2 mt-2 pt-1 border-t border-slate-100 dark:border-slate-700/60 text-[11px]">
               <div>
                 <span className="text-slate-400 block">Fase 1 (MVP):</span>
-                <span className="font-bold text-slate-800 dark:text-slate-200">3 a 4 meses</span>
+                <span className="font-bold text-slate-800 dark:text-slate-200">3 a 4 meses (S1-S6)</span>
               </div>
               <div>
-                <span className="text-slate-400 block">Plataforma Toda:</span>
-                <span className="font-bold text-slate-800 dark:text-slate-200">5 a 8 meses</span>
+                <span className="text-slate-400 block">Ciclo padrão:</span>
+                <span className="font-bold text-slate-800 dark:text-slate-200">2 sem / sprint</span>
               </div>
             </div>
           </div>

@@ -4,7 +4,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { BoardState, Sprint, TaskItem, TaskStatus, TaskCategory, QuickNote, QuickNoteType } from '@/types/board';
 import { INITIAL_BOARD_DATA } from '@/lib/initialData';
 import { loadBoardState, saveBoardState, exportBoardToJson } from '@/lib/storage';
-import { recalculateSprintDates } from '@/lib/dateUtils';
+import { recalculateSprintDates, calculateSprintStats } from '@/lib/dateUtils';
 import { isSupabaseConfigured } from '@/lib/supabase';
 import { fetchBoardFromCloud, saveBoardToCloud, subscribeToBoardRealtime } from '@/lib/supabaseBoard';
 import { BoardStatsHeader } from '@/components/BoardStatsHeader';
@@ -537,20 +537,28 @@ export default function BoardHomePage() {
                 </button>
               </div>
             ) : (
-              filteredSprints.map((sprint, index) => {
-                const isEndOfMvp = sprint.number === 6;
+              (() => {
+                const activeSprintId = boardState.sprints.find((s) => {
+                  const stats = calculateSprintStats(s);
+                  return !stats.isCompleted;
+                })?.id;
 
-                return (
-                  <React.Fragment key={sprint.id}>
-                    <SprintCard
-                      sprint={sprint}
-                      isFirst={index === 0}
-                      isLast={index === filteredSprints.length - 1}
-                      onStatusChange={handleTaskStatusChange}
-                      onEditSprint={(s) => {
-                        setSprintToEdit(s);
-                        setIsSprintModalOpen(true);
-                      }}
+                return filteredSprints.map((sprint, index) => {
+                  const isEndOfMvp = sprint.number === 6;
+                  const isDefaultExpanded = sprint.id === activeSprintId;
+
+                  return (
+                    <React.Fragment key={sprint.id}>
+                      <SprintCard
+                        sprint={sprint}
+                        defaultExpanded={isDefaultExpanded}
+                        isFirst={index === 0}
+                        isLast={index === filteredSprints.length - 1}
+                        onStatusChange={handleTaskStatusChange}
+                        onEditSprint={(s) => {
+                          setSprintToEdit(s);
+                          setIsSprintModalOpen(true);
+                        }}
                       onDeleteSprint={handleDeleteSprint}
                       onMoveSprint={handleMoveSprintDirection}
                       onAddTask={(sId) => {
@@ -594,8 +602,9 @@ export default function BoardHomePage() {
                     )}
                   </React.Fragment>
                 );
-              })
-            )}
+              });
+            })()
+          )}
           </div>
 
           {isDrawerOpen && (

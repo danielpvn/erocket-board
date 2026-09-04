@@ -48,8 +48,8 @@ export const LoginScreen: React.FC<LoginScreenProps> = ({ onLoginSuccess }) => {
       <div className="w-full max-w-md bg-slate-900/90 backdrop-blur-xl border border-slate-800 rounded-3xl shadow-2xl p-8 z-10">
         {/* Header / Logo */}
         <div className="text-center mb-8">
-          <div className="w-16 h-16 rounded-2xl bg-primary flex items-center justify-center text-white mx-auto shadow-lg shadow-primary/30 mb-4 animate-bounce duration-1000">
-            <Rocket className="w-8 h-8" />
+          <div className="w-20 h-20 rounded-2xl bg-white p-2.5 flex items-center justify-center mx-auto shadow-xl shadow-emerald-500/20 mb-4 border border-slate-700/50">
+            <img src="/logo.png" alt="eRocket Logo" className="w-full h-full object-contain" />
           </div>
           <h1 className="text-2xl font-extrabold text-slate-100 tracking-tight">
             Erocket Board

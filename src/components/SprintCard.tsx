@@ -1,7 +1,7 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Sprint, TaskItem, TaskStatus, TaskCategory } from '@/types/board';
 import { TaskCard } from './TaskCard';
-import { calculateSprintStats } from '@/lib/dateUtils';
+import { calculateSprintStats, getSprintScheduleStatus } from '@/lib/dateUtils';
 import {
   GripVertical,
   Calendar,
@@ -15,12 +15,17 @@ import {
   CheckCircle,
   ArrowUp,
   ArrowDown,
+  AlertTriangle,
+  Clock,
+  Flame,
+  AlertCircle,
 } from 'lucide-react';
 
 interface SprintCardProps {
   sprint: Sprint;
   isFirst: boolean;
   isLast: boolean;
+  defaultExpanded?: boolean;
   onStatusChange: (taskId: string, newStatus: TaskStatus, sprintId: string) => void;
   onEditSprint: (sprint: Sprint) => void;
   onDeleteSprint: (sprintId: string) => void;
@@ -40,6 +45,7 @@ export const SprintCard: React.FC<SprintCardProps> = ({
   sprint,
   isFirst,
   isLast,
+  defaultExpanded = true,
   onStatusChange,
   onEditSprint,
   onDeleteSprint,
@@ -54,7 +60,12 @@ export const SprintCard: React.FC<SprintCardProps> = ({
   onDropOnSprint,
   onDragStartTask,
 }) => {
-  const [isCollapsed, setIsCollapsed] = useState(false);
+  const [isCollapsed, setIsCollapsed] = useState(!defaultExpanded);
+
+  // Sync if defaultExpanded changes
+  useEffect(() => {
+    setIsCollapsed(!defaultExpanded);
+  }, [defaultExpanded]);
   const [showMenu, setShowMenu] = useState(false);
   const [quickTitle, setQuickTitle] = useState('');
   const [quickCategory, setQuickCategory] = useState<TaskCategory>('funcionalidade');
@@ -63,6 +74,7 @@ export const SprintCard: React.FC<SprintCardProps> = ({
   const [isDragOver, setIsDragOver] = useState(false);
 
   const stats = calculateSprintStats(sprint);
+  const schedule = getSprintScheduleStatus(sprint);
 
   const handleQuickSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -96,6 +108,8 @@ export const SprintCard: React.FC<SprintCardProps> = ({
       className={`rounded-2xl border transition-all duration-200 ${
         isDragOver
           ? 'border-primary ring-2 ring-primary/20 bg-primary/[0.02] dark:bg-primary/[0.08]'
+          : schedule.status === 'delayed'
+          ? 'border-rose-500/40 bg-rose-500/[0.02] dark:bg-rose-950/10'
           : stats.isCompleted
           ? 'border-emerald-500/30 bg-emerald-500/[0.03] dark:bg-emerald-950/20 dark:border-emerald-500/30'
           : sprint.isMvp
@@ -106,7 +120,7 @@ export const SprintCard: React.FC<SprintCardProps> = ({
       {/* Sprint Header */}
       <div className="p-4 sm:p-5 border-b border-slate-100 dark:border-slate-800/80">
         <div className="flex items-start justify-between gap-3">
-          <div className="flex items-start gap-3 min-w-0">
+          <div className="flex items-start gap-3 min-w-0 flex-1">
             <div
               className="mt-1 p-1 rounded-lg text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 cursor-grab active:cursor-grabbing transition-colors shrink-0"
               title="Arraste esta sprint para reordenar"
@@ -114,7 +128,7 @@ export const SprintCard: React.FC<SprintCardProps> = ({
               <GripVertical className="w-5 h-5" />
             </div>
 
-            <div className="min-w-0">
+            <div className="min-w-0 flex-1 cursor-pointer" onClick={() => setIsCollapsed(!isCollapsed)}>
               <div className="flex flex-wrap items-center gap-2">
                 <h3 className="text-base sm:text-lg font-bold text-slate-900 dark:text-slate-100 tracking-tight">
                   {sprint.title}
@@ -127,10 +141,20 @@ export const SprintCard: React.FC<SprintCardProps> = ({
                   </span>
                 )}
 
-                {stats.isCompleted && (
-                  <span className="inline-flex items-center gap-1 text-[11px] font-semibold px-2 py-0.5 rounded-full bg-emerald-500/15 text-emerald-700 dark:text-emerald-300 border border-emerald-500/30">
-                    <CheckCircle className="w-3 h-3" />
-                    100% Concluída
+                {/* Status do Prazo / Deadline */}
+                <span className={`inline-flex items-center gap-1 text-[11px] font-semibold px-2.5 py-0.5 rounded-full border ${schedule.badgeClass}`}>
+                  {schedule.status === 'delayed' && <AlertTriangle className="w-3.5 h-3.5 text-rose-600 shrink-0" />}
+                  {schedule.status === 'warning' && <Clock className="w-3.5 h-3.5 text-amber-600 shrink-0" />}
+                  {schedule.status === 'in_progress' && <Flame className="w-3.5 h-3.5 text-blue-600 shrink-0" />}
+                  {schedule.status === 'completed' && <CheckCircle className="w-3.5 h-3.5 text-emerald-600 shrink-0" />}
+                  <span>{schedule.label}</span>
+                </span>
+
+                {/* Aviso quando fechada mas com itens pendentes */}
+                {isCollapsed && !stats.isCompleted && (stats.todo > 0 || stats.inProgress > 0) && (
+                  <span className="inline-flex items-center gap-1 text-[11px] font-semibold px-2.5 py-0.5 rounded-full bg-amber-500/15 text-amber-900 dark:text-amber-200 border border-amber-500/30 shadow-xs" title={`${stats.todo + stats.inProgress} tarefas pendentes nesta sprint`}>
+                    <AlertCircle className="w-3 h-3 text-amber-600 shrink-0" />
+                    <span>{stats.todo + stats.inProgress} {stats.todo + stats.inProgress === 1 ? 'pendência' : 'pendências'}</span>
                   </span>
                 )}
               </div>
