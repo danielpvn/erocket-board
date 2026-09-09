@@ -248,6 +248,66 @@ export default function BoardHomePage() {
     });
   };
 
+  const handleMoveTaskDirection = (taskId: string, sprintId: string, direction: 'up' | 'down') => {
+    const nextSprints = boardState.sprints.map((sprint) => {
+      if (sprint.id !== sprintId) return sprint;
+      const index = sprint.tasks.findIndex((t) => t.id === taskId);
+      if (index === -1) return sprint;
+      const targetIndex = direction === 'up' ? index - 1 : index + 1;
+      if (targetIndex < 0 || targetIndex >= sprint.tasks.length) return sprint;
+
+      const newTasks = [...sprint.tasks];
+      const [moved] = newTasks.splice(index, 1);
+      newTasks.splice(targetIndex, 0, moved);
+
+      return {
+        ...sprint,
+        tasks: newTasks,
+      };
+    });
+    updateBoard({ ...boardState, sprints: nextSprints });
+  };
+
+  const handleDropTaskOnTask = (
+    sourceTaskId: string,
+    sourceSprintId: string,
+    targetTaskId: string,
+    targetSprintId: string
+  ) => {
+    if (sourceTaskId === targetTaskId && sourceSprintId === targetSprintId) return;
+
+    const sourceSprint = boardState.sprints.find((s) => s.id === sourceSprintId);
+    const taskToMove = sourceSprint?.tasks.find((t) => t.id === sourceTaskId);
+    if (!taskToMove) return;
+
+    if (sourceSprintId === targetSprintId) {
+      const nextSprints = boardState.sprints.map((sprint) => {
+        if (sprint.id !== sourceSprintId) return sprint;
+        const tasksWithout = sprint.tasks.filter((t) => t.id !== sourceTaskId);
+        const targetIndex = tasksWithout.findIndex((t) => t.id === targetTaskId);
+        const insertIndex = targetIndex === -1 ? tasksWithout.length : targetIndex;
+        tasksWithout.splice(insertIndex, 0, taskToMove);
+        return { ...sprint, tasks: tasksWithout };
+      });
+      updateBoard({ ...boardState, sprints: nextSprints });
+    } else {
+      const nextSprints = boardState.sprints.map((sprint) => {
+        if (sprint.id === sourceSprintId) {
+          return { ...sprint, tasks: sprint.tasks.filter((t) => t.id !== sourceTaskId) };
+        }
+        if (sprint.id === targetSprintId) {
+          const targetIndex = sprint.tasks.findIndex((t) => t.id === targetTaskId);
+          const insertIndex = targetIndex === -1 ? sprint.tasks.length : targetIndex;
+          const newTasks = [...sprint.tasks];
+          newTasks.splice(insertIndex, 0, taskToMove);
+          return { ...sprint, tasks: newTasks };
+        }
+        return sprint;
+      });
+      updateBoard({ ...boardState, sprints: nextSprints });
+    }
+  };
+
   // Sprint Add / Edit / Delete / Move
   const handleSaveSprint = (sprintData: Partial<Sprint>, sprintId?: string) => {
     if (sprintId) {
@@ -574,9 +634,11 @@ export default function BoardHomePage() {
                       }}
                       onDeleteTask={handleDeleteTask}
                       onMoveTaskToBacklog={handleMoveTaskToBacklog}
+                      onMoveTaskDirection={handleMoveTaskDirection}
                       onDragStartSprint={handleDragStartSprint}
                       onDropOnSprint={handleDropOnSprint}
                       onDragStartTask={handleDragStartTask}
+                      onDropTaskOnTask={handleDropTaskOnTask}
                     />
 
                     {isEndOfMvp && selectedScope === 'all' && (

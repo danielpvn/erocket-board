@@ -3,28 +3,46 @@ import { TaskItem, TaskStatus } from '@/types/board';
 import { StatusBadge } from './StatusBadge';
 import { CategoryBadge } from './CategoryBadge';
 import { DevBadge } from './DevBadge';
-import { GripVertical, MoreVertical, Edit2, Trash2, ArrowRight, MessageSquareText } from 'lucide-react';
+import {
+  GripVertical,
+  MoreVertical,
+  Edit2,
+  Trash2,
+  ArrowRight,
+  ArrowUp,
+  ArrowDown,
+  MessageSquareText,
+} from 'lucide-react';
 
 interface TaskCardProps {
   task: TaskItem;
   sprintId: string;
+  isFirst?: boolean;
+  isLast?: boolean;
   onStatusChange: (taskId: string, newStatus: TaskStatus) => void;
   onEdit: (task: TaskItem, sprintId: string) => void;
   onDelete: (taskId: string, sprintId: string) => void;
   onMoveToBacklog?: (task: TaskItem, sprintId: string) => void;
+  onMoveDirection?: (taskId: string, sprintId: string, direction: 'up' | 'down') => void;
   onDragStart?: (e: React.DragEvent, taskId: string, sprintId: string) => void;
+  onDropOnTask?: (e: React.DragEvent, targetTaskId: string, targetSprintId: string) => void;
 }
 
 export const TaskCard: React.FC<TaskCardProps> = ({
   task,
   sprintId,
+  isFirst = false,
+  isLast = false,
   onStatusChange,
   onEdit,
   onDelete,
   onMoveToBacklog,
+  onMoveDirection,
   onDragStart,
+  onDropOnTask,
 }) => {
   const [showMenu, setShowMenu] = useState(false);
+  const [isDragOver, setIsDragOver] = useState(false);
 
   const cycleStatus = () => {
     let next: TaskStatus = 'todo';
@@ -41,8 +59,27 @@ export const TaskCard: React.FC<TaskCardProps> = ({
     <div
       draggable
       onDragStart={(e) => onDragStart && onDragStart(e, task.id, sprintId)}
+      onDragOver={(e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        setIsDragOver(true);
+      }}
+      onDragLeave={(e) => {
+        e.stopPropagation();
+        setIsDragOver(false);
+      }}
+      onDrop={(e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        setIsDragOver(false);
+        if (onDropOnTask) {
+          onDropOnTask(e, task.id, sprintId);
+        }
+      }}
       className={`group relative flex items-start gap-2.5 p-3 rounded-xl border transition-all duration-200 ${
-        isDone
+        isDragOver
+          ? 'border-primary ring-2 ring-primary/40 bg-primary/5 dark:bg-primary/10 scale-[1.01]'
+          : isDone
           ? 'bg-emerald-500/[0.04] dark:bg-emerald-950/20 border-emerald-500/20 dark:border-emerald-800/40 hover:border-emerald-500/40'
           : isInProgress
           ? 'bg-amber-500/[0.05] dark:bg-amber-950/20 border-amber-500/30 dark:border-amber-800/50 hover:border-amber-500/50 shadow-xs'
@@ -116,6 +153,34 @@ export const TaskCard: React.FC<TaskCardProps> = ({
                     <Edit2 className="w-3.5 h-3.5 text-slate-500" />
                     <span>Editar Tarefa</span>
                   </button>
+
+                  {!isFirst && onMoveDirection && (
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setShowMenu(false);
+                        onMoveDirection(task.id, sprintId, 'up');
+                      }}
+                      className="w-full flex items-center gap-2 px-3 py-1.5 text-xs text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800"
+                    >
+                      <ArrowUp className="w-3.5 h-3.5 text-slate-500" />
+                      <span>Mover para Cima</span>
+                    </button>
+                  )}
+
+                  {!isLast && onMoveDirection && (
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setShowMenu(false);
+                        onMoveDirection(task.id, sprintId, 'down');
+                      }}
+                      className="w-full flex items-center gap-2 px-3 py-1.5 text-xs text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800"
+                    >
+                      <ArrowDown className="w-3.5 h-3.5 text-slate-500" />
+                      <span>Mover para Baixo</span>
+                    </button>
+                  )}
 
                   {onMoveToBacklog && (
                     <button

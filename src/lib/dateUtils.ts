@@ -36,13 +36,27 @@ export function recalculateSprintDates(
     currentDate = new Date(endDate);
 
     const calculatedLabel = formatDateInterval(startDate, endDate);
+    const newNumber = index;
+
+    // Atualiza o título da sprint para o novo número caso siga o padrão "Sprint X — ..." ou "Sprint X: ..."
+    let updatedTitle = sprint.title;
+    const titleMatch = sprint.title.match(/^Sprint\s+\d+\s*(?:—|-|:)\s*(.*)$/i);
+    if (titleMatch) {
+      const suffix = titleMatch[1].trim();
+      updatedTitle = `Sprint ${newNumber} — ${suffix}`;
+    } else if (/^Sprint\s+\d+$/i.test(sprint.title.trim())) {
+      updatedTitle = `Sprint ${newNumber}`;
+    }
 
     return {
       ...sprint,
       order: index,
+      number: newNumber,
+      title: updatedTitle,
       startDate: startDate.toISOString().split('T')[0],
       endDate: endDate.toISOString().split('T')[0],
-      customDateLabel: sprint.customDateLabel || calculatedLabel,
+      customDateLabel: calculatedLabel,
+      isMvp: index <= 6,
     };
   });
 }

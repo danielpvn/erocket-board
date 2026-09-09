@@ -35,10 +35,12 @@ interface SprintCardProps {
   onEditTask: (task: TaskItem, sprintId: string) => void;
   onDeleteTask: (taskId: string, sprintId: string) => void;
   onMoveTaskToBacklog?: (task: TaskItem, sprintId: string) => void;
+  onMoveTaskDirection?: (taskId: string, sprintId: string, direction: 'up' | 'down') => void;
   onDragStartSprint?: (e: React.DragEvent, sprintId: string) => void;
   onDragOverSprint?: (e: React.DragEvent, sprintId: string) => void;
   onDropOnSprint?: (e: React.DragEvent, targetSprintId: string) => void;
   onDragStartTask?: (e: React.DragEvent, taskId: string, sourceSprintId: string) => void;
+  onDropTaskOnTask?: (sourceTaskId: string, sourceSprintId: string, targetTaskId: string, targetSprintId: string) => void;
 }
 
 export const SprintCard: React.FC<SprintCardProps> = ({
@@ -55,10 +57,12 @@ export const SprintCard: React.FC<SprintCardProps> = ({
   onEditTask,
   onDeleteTask,
   onMoveTaskToBacklog,
+  onMoveTaskDirection,
   onDragStartSprint,
   onDragOverSprint,
   onDropOnSprint,
   onDragStartTask,
+  onDropTaskOnTask,
 }) => {
   const [isCollapsed, setIsCollapsed] = useState(!defaultExpanded);
 
@@ -334,18 +338,28 @@ export const SprintCard: React.FC<SprintCardProps> = ({
             </div>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 gap-2.5">
-              {filteredTasks.map((task) => (
+              {filteredTasks.map((task, idx) => (
                 <TaskCard
                   key={task.id}
                   task={task}
                   sprintId={sprint.id}
+                  isFirst={idx === 0}
+                  isLast={idx === filteredTasks.length - 1}
                   onStatusChange={(taskId, newStatus) =>
                     onStatusChange(taskId, newStatus, sprint.id)
                   }
                   onEdit={onEditTask}
                   onDelete={onDeleteTask}
                   onMoveToBacklog={onMoveTaskToBacklog}
+                  onMoveDirection={onMoveTaskDirection}
                   onDragStart={onDragStartTask}
+                  onDropOnTask={(e, targetTaskId, targetSprintId) => {
+                    const sourceTaskId = e.dataTransfer.getData('text/task-id');
+                    const sourceSprintId = e.dataTransfer.getData('text/source-sprint-id');
+                    if (sourceTaskId && sourceSprintId && onDropTaskOnTask) {
+                      onDropTaskOnTask(sourceTaskId, sourceSprintId, targetTaskId, targetSprintId);
+                    }
+                  }}
                 />
               ))}
             </div>
