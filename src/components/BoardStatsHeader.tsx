@@ -2,7 +2,7 @@ import React from 'react';
 import { Sprint } from '@/types/board';
 import { calculateOverallStats } from '@/lib/dateUtils';
 import {
-  Download,
+  FileText,
   Upload,
   Calendar,
   Plus,
@@ -113,11 +113,11 @@ export const BoardStatsHeader: React.FC<BoardStatsHeaderProps> = ({
             <button
               type="button"
               onClick={onExport}
-              className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors cursor-pointer"
-              title="Baixar backup dos dados em JSON"
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-xl border border-rose-200 dark:border-rose-900/50 bg-rose-50/70 dark:bg-rose-950/20 text-rose-700 dark:text-rose-300 hover:bg-rose-100 dark:hover:bg-rose-950/40 transition-colors cursor-pointer"
+              title="Gerar e baixar relatório executivo em PDF de todas as sprints e atividades"
             >
-              <Download className="w-3.5 h-3.5 text-slate-500" />
-              <span>Exportar Backup</span>
+              <FileText className="w-3.5 h-3.5 text-rose-600 dark:text-rose-400" />
+              <span>Exportar PDF</span>
             </button>
 
             <button

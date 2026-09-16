@@ -3,7 +3,8 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { BoardState, Sprint, TaskItem, TaskStatus, TaskCategory, QuickNote, QuickNoteType } from '@/types/board';
 import { INITIAL_BOARD_DATA } from '@/lib/initialData';
-import { loadBoardState, saveBoardState, exportBoardToJson } from '@/lib/storage';
+import { loadBoardState, saveBoardState } from '@/lib/storage';
+import { exportBoardToPdf } from '@/lib/pdfExport';
 import { recalculateSprintDates, calculateSprintStats } from '@/lib/dateUtils';
 import { isSupabaseConfigured } from '@/lib/supabase';
 import { fetchBoardFromCloud, saveBoardToCloud, subscribeToBoardRealtime } from '@/lib/supabaseBoard';
@@ -554,7 +555,7 @@ export default function BoardHomePage() {
         syncStatus={syncStatus}
         onToggleDarkMode={handleToggleDarkMode}
         onLogout={handleLogout}
-        onExport={() => exportBoardToJson(boardState)}
+        onExport={() => exportBoardToPdf(boardState)}
         onOpenImport={() => setIsImportModalOpen(true)}
         onOpenDateSettings={() => setIsDateModalOpen(true)}
         onAddSprint={() => {
